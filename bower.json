@@ -1,0 +1,20 @@
+{
+  "name": "full-vanilla-js",
+  "description": "",
+  "main": "gulpfile.js",
+  "authors": [
+    "ygorkagrishin <webygorkagrishin@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "normalize-css": "^7.0.0"
+  }
+}
