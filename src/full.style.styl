@@ -4,9 +4,11 @@
 
 #full
     height: 100vh;
+    overflow: hidden;
 
 .js-full__wrapper
     min-height: 100vh;
+    will-change: transform;
 
 .section 
     height: 100%;
@@ -15,7 +17,25 @@
     background-color: red;
 
 .js-full__wrapper .js-full__section:nth-child(2)
-    background-color: yellow;
+    background-color: orange;
 
- .js-full__wrapper .js-full__section:nth-child(3)
+.js-full__wrapper .js-full__section:nth-child(3)
     background-color: green;
+
+.js-full__nav
+    position: fixed;
+    top: 35%;
+    right: 2%;
+    .js-full__item
+        list-style: none;
+        .js-full__link
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin: 12px;
+            background-color: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+
+.js-full__wrapper.active
+    transition: all 0.7s;
