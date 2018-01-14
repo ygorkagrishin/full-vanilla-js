@@ -18,7 +18,7 @@ priv.container = document.getElementById( priv.default.container );
 
 priv.sections = priv.container.getElementsByClassName( priv.default.section );
 
-// В объект записываются имена классов, которые впоследствии будут присвоены новым элементам.
+/* В объект записываются имена классов, которые впоследствии будут присвоены новым элементам. */
 priv.comp = {
     wrapper : 'js-full__wrapper',
     section : 'js-full__section',
@@ -29,19 +29,39 @@ priv.comp = {
     }
 }
 
-// Массив со значениями для data-anchor.
-priv.anchor = {
-    name : 'data-anchor',
-    array : priv.param.anchor
+priv.swipe = {
+  touches : false,
+  touch : false,
+  coord : {
+    start : {
+      x : null,
+      y : null
+    },
+    end : {
+      x : null,
+      y : null
+    }
+  }
+  // counterSection : 0
 }
 
-// Динамическая обертка для секций устанавливающая их высоту равной высоте окна.
-// Так же метод перезаписывает priv.sections присваивая новую коллекцию элементов.
+priv.counterSection = 0;
+
+/* Массив со значениями для data-anchor. */
+priv.label = {
+    name : 'data-full',
+    array : priv.param.label
+}
+
+/* Динамическая обертка для секций устанавливающая их высоту равной высоте окна.
+Так же метод перезаписывает priv.sections присваивая новую коллекцию элементов. */
 priv.section = ( function () {
+  var currentSection, clone, newSection;
+  
   for ( var i = 0; i <= priv.sections.length - 1; i++) {
-  var currentSection = priv.sections[i],
-      clone = currentSection.cloneNode( true ),
-      newSection = document.createElement( 'div' );
+  currentSection = priv.sections[i],
+  clone = currentSection.cloneNode( true ),
+  newSection = document.createElement( 'div' );
       
   priv.container.replaceChild( newSection, currentSection );
   newSection.classList.add( priv.comp.section ),
@@ -50,10 +70,12 @@ priv.section = ( function () {
   priv.sections = priv.container.getElementsByClassName( priv.comp.section );
 })();
 
-// Динамическая обертка внутри контейнера для перемещения.
+/* Динамическая обертка внутри контейнера для перемещения. */
 priv.wrapper = (function () {
-  var wrapper = document.createElement( 'div' ),
-      content = priv.container.innerHTML;
+  var wrapper, content;
+
+  wrapper = document.createElement( 'div' ),
+  content = priv.container.innerHTML;
     
   priv.container.innerHTML= ' ';    
   priv.container.appendChild( wrapper );
@@ -61,72 +83,115 @@ priv.wrapper = (function () {
   wrapper.innerHTML = content;    
 })();
 
-// Метод устанавливает высоту оберткам секций равной высоте окна.
+/* Метод устанавливает высоту оберткам секций равной высоте окна. */
 priv.setHeight = ( function () {
   for ( var i = 0; i <= priv.sections.length - 1; i++ ) 
-    priv.sections[i].style.height = window.innerHeight + 'px';
+  priv.sections[i].style.height = window.innerHeight + 'px';
 })();
 
 
-// Если свойство объекта не undefined и массив, то метод проходит циклом по секциям и устанавливает
-// атрибут data-anchor.
-if ( priv.anchor.array !== undefined && Array.isArray( priv.anchor.array ) )
+/* Если свойство объекта не undefined и является массивом, 
+то метод проходит циклом по секциям и устанавливает атрибут data-anchor. */
+if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
 priv.data = (function () {
   for ( var i = 0; i <= priv.sections.length - 1; i++ )
-    if ( !priv.sections[i].hasAttribute( priv.anchor[i] ) )
-      priv.sections[i].setAttribute( priv.anchor.name, priv.anchor.array[i] );
+  if ( !priv.sections[i].hasAttribute( priv.label[i] ) )
+  priv.sections[i].setAttribute( priv.label.name, priv.label.array[i] );
 })();
 
-// Метод создает навигационную панель
-if ( priv.default.navigator && priv.anchor.array !== undefined && Array.isArray( priv.anchor.array ) )
+/* Метод, создает навигационную панель */
+if ( priv.default.navigator && priv.label.array !== undefined && Array.isArray( priv.label.array ) )
 priv.navigator = (function () {
-  
-  var navigator = document.createElement( 'ul' ), item, link;
+  var navigator, item, link;
+
+  navigator = document.createElement( 'ul' );
   priv.container.appendChild( navigator );
   navigator.classList.add( priv.comp.navigator.name );
   
-  for ( var i = 0; i <= priv.anchor.array.length - 1; i++ ) {
-    item = document.createElement( 'li' );
-    navigator.appendChild( item );
+  for ( var i = 0; i <= priv.label.array.length - 1; i++ ) {
+  item = document.createElement( 'li' );
+  navigator.appendChild( item );
     
-    item.classList.add( priv.comp.navigator.item );
-    link = document.createElement( 'a' );
-    item.appendChild( link );
-    link.classList.add( priv.comp.navigator.link );
+  item.classList.add( priv.comp.navigator.item );
+  link = document.createElement( 'a' );
+  item.appendChild( link );
+  link.classList.add( priv.comp.navigator.link );
     
-    if ( !link.hasAttribute( priv.anchor.name ) )
-      link.setAttribute( priv.anchor.name, priv.anchor.array[i] );
-  }
+  if ( !link.hasAttribute( priv.label.name ) )
+  link.setAttribute( priv.label.name, priv.label.array[i] ); }
 })();
 
-// Метод обрабатывающий событие при клике по элементу с атрибутом data-
+/* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
 priv.draw = function ( e ) {
   var target = e.target, wrap, getValue, offset;
 
-  if ( target.hasAttribute( priv.anchor.name ) ) { 
+  if ( target.hasAttribute( priv.label.name ) ) { 
     if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
-    getValue = target.getAttribute( priv.anchor.name );
+    
+    getValue = target.getAttribute( priv.label.name );
       
     for ( var i = 0; i<= priv.sections.length - 1; i++ ) { 
-      if ( priv.sections[i].hasAttribute( priv.anchor.name ) ) { 
-        if ( priv.sections[i].getAttribute( priv.anchor.name ) === getValue ) {
-          offset = priv.sections[i].offsetTop;
-          wrap = priv.container.getElementsByClassName( priv.comp.wrapper );
-          wrap[0].style.transform = 'translateY(-'+ offset +'px)';
-          wrap[0].classList.add( 'active' );
+      if ( priv.sections[i].hasAttribute( priv.label.name ) ) { 
+        if ( priv.sections[i].getAttribute( priv.label.name ) === getValue ) {
+        offset = priv.sections[i].offsetTop;
+        wrap = priv.container.getElementsByClassName( priv.comp.wrapper );
+        wrap[0].style.transform = 'translateY(-'+ offset +'px)';
+        priv.counterSection = i;
         }
       }
     }
   }
 }
 
-// Обработчик события скролл при клике по элементу с атрибутом data-
-if ( Array.isArray( priv.anchor.array ) ) priv.container.addEventListener( 'click', priv.draw );
+/* Обработчик события скролл при клике по элементу с атрибутом data- */
+if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click', priv.draw );
 
+priv.container.addEventListener( 'touchstart', function ( e ) {
+  
+  priv.swipe.touches = e.touches;
+
+  if ( priv.swipe.touches.length !== 1 ) return;
+
+  priv.swipe.touch = e.changedTouches[0];
+
+  priv.swipe.coord.start.x = priv.swipe.touch.clientX;
+  priv.swipe.coord.start.y = priv.swipe.touch.clientY;
+
+  console.log( 'Touchstart x : ' + priv.swipe.coord.start.x ); 
+  console.log( 'Touchstart y : ' + priv.swipe.coord.start.y );
+
+});
+
+priv.container.addEventListener( 'touchend', function ( e ) {
+  var wrapper, currentSection;
+
+  priv.swipe.touch = e.changedTouches[0];
+
+  priv.swipe.coord.end.x = priv.swipe.touch.clientX;
+  priv.swipe.coord.end.y = priv.swipe.touch.clientY;
+
+  wrapper = priv.container.getElementsByClassName( priv.comp.wrapper );
+  currentSection = wrapper[0].getElementsByClassName( priv.comp.section );
+
+  if ( priv.counterSection !== currentSection.length - 1 
+  && priv.swipe.coord.start.y > priv.swipe.coord.end.y ) 
+  ++priv.counterSection
+  else if ( priv.counterSection !== 0 &&
+  priv.swipe.coord.start.y < priv.swipe.coord.end.y ) 
+  --priv.counterSection;
+
+  wrapper[0].classList.add( 'active' );
+  wrapper[0].style.transform = 'translateY(-'+ currentSection[priv.counterSection].offsetTop +'px)';
+
+  console.log( 'Touchend x : ' + priv.swipe.coord.end.x );
+  console.log( 'Touchend y : ' + priv.swipe.coord.end.y ); 
+});
+
+// End contsr
 }
 
 var full = new Full({
     container : 'full',
-    anchor : [ 'hero', 'main', 'footer' ],
+    label : [ 'hero', 'main', 'footer' ],
     navigator : true
 });

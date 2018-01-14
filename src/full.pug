@@ -12,7 +12,16 @@ body
 
 // Full container
 #full
-    - for ( var i = 0; i < 3; i++ )
-        section.section
+    section.section
+        nav.nav
+            ul.nav__list
+                li.nav__item  
+                    a.nav__link( href="#", data-full="hero" ) Section-1
+                li.nav__item
+                    a.nav__link( href="#", data-full="main" ) Section-2
+                li.nav__item
+                    a.nav__link( href="#", data-full="footer" ) Section-3
+    section.section
+    section.section
 
 script( src="full.script.js" )
