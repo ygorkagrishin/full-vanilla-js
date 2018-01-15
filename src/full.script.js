@@ -30,8 +30,9 @@ priv.comp = {
 }
 
 priv.swipe = {
-  touches : false,
   touch : false,
+  start : false,
+  detecting : false,
   coord : {
     start : {
       x : null,
@@ -42,7 +43,6 @@ priv.swipe = {
       y : null
     }
   }
-  // counterSection : 0
 }
 
 priv.counterSection = 0;
@@ -59,13 +59,13 @@ priv.section = ( function () {
   var currentSection, clone, newSection;
   
   for ( var i = 0; i <= priv.sections.length - 1; i++) {
-  currentSection = priv.sections[i],
-  clone = currentSection.cloneNode( true ),
-  newSection = document.createElement( 'div' );
+    currentSection = priv.sections[i],
+    clone = currentSection.cloneNode( true ),
+    newSection = document.createElement( 'div' );
       
-  priv.container.replaceChild( newSection, currentSection );
-  newSection.classList.add( priv.comp.section ),
-  newSection.appendChild( clone ); }
+    priv.container.replaceChild( newSection, currentSection );
+    newSection.classList.add( priv.comp.section ),
+    newSection.appendChild( clone ); }
   
   priv.sections = priv.container.getElementsByClassName( priv.comp.section );
 })();
@@ -86,17 +86,17 @@ priv.wrapper = (function () {
 /* Метод устанавливает высоту оберткам секций равной высоте окна. */
 priv.setHeight = ( function () {
   for ( var i = 0; i <= priv.sections.length - 1; i++ ) 
-  priv.sections[i].style.height = window.innerHeight + 'px';
+    priv.sections[i].style.height = window.innerHeight + 'px';
 })();
 
 
 /* Если свойство объекта не undefined и является массивом, 
 то метод проходит циклом по секциям и устанавливает атрибут data-anchor. */
 if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
-priv.data = (function () {
+  priv.data = (function () {
   for ( var i = 0; i <= priv.sections.length - 1; i++ )
-  if ( !priv.sections[i].hasAttribute( priv.label[i] ) )
-  priv.sections[i].setAttribute( priv.label.name, priv.label.array[i] );
+    if ( !priv.sections[i].hasAttribute( priv.label[i] ) )
+      priv.sections[i].setAttribute( priv.label.name, priv.label.array[i] );
 })();
 
 /* Метод, создает навигационную панель */
@@ -109,88 +109,80 @@ priv.navigator = (function () {
   navigator.classList.add( priv.comp.navigator.name );
   
   for ( var i = 0; i <= priv.label.array.length - 1; i++ ) {
-  item = document.createElement( 'li' );
-  navigator.appendChild( item );
+    item = document.createElement( 'li' );
+    navigator.appendChild( item );
     
-  item.classList.add( priv.comp.navigator.item );
-  link = document.createElement( 'a' );
-  item.appendChild( link );
-  link.classList.add( priv.comp.navigator.link );
+    item.classList.add( priv.comp.navigator.item );
+    link = document.createElement( 'a' );
+    item.appendChild( link );
+    link.classList.add( priv.comp.navigator.link );
     
   if ( !link.hasAttribute( priv.label.name ) )
-  link.setAttribute( priv.label.name, priv.label.array[i] ); }
+    link.setAttribute( priv.label.name, priv.label.array[i] ); }
 })();
 
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
 priv.draw = function ( e ) {
-  var target = e.target, wrapper, sections, currentSection, value, offset;
+  var target = e.target, wrapper, sections, value;
   
-  wrapper = priv.container.getElementsByClassName( priv.comp.wrapper )[0];
-  sections = wrapper.getElementsByClassName( priv.comp.section );
+  wrapper = priv.container.getElementsByClassName( priv.comp.wrapper );
+  sections = wrapper[0].getElementsByClassName( priv.comp.section );
 
   if ( target.hasAttribute( priv.label.name ) ) {
   
   if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
   
   value = target.getAttribute( priv.label.name );
-
   for ( var i = 0; i <= sections.length - 1; i++ )
-  if ( sections[i].hasAttribute( priv.label.name ) && 
-  sections[i].getAttribute( priv.label.name ) === value )
-  priv.counterSection = i;
+    if ( sections[i].hasAttribute( priv.label.name ) && 
+    sections[i].getAttribute( priv.label.name ) === value )
+      priv.counterSection = i;
 
-  currentSection = sections[priv.counterSection];
-  offset = currentSection.offsetTop;
-
-  wrapper.classList.add( 'active' );
-  wrapper.style.transform = 'translateY(-' + offset + 'px)';
-
+  wrapper[0].classList.add( 'active' );
+  wrapper[0].style.transform = 'translateY(-' + sections[priv.counterSection].offsetTop + 'px)';
   }
 }
 
 /* Обработчик события скролл при клике по элементу с атрибутом data- */
 if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click', priv.draw );
 
-priv.container.addEventListener( 'touchstart', function ( e ) {
-  
-  priv.swipe.touches = e.touches;
+/* Метод для обработчика touchstart получает начальные координаты касания */
+priv.swipeStart = function ( e ) {
+    priv.swipe.touch = e.changedTouches[0];
+    priv.swipe.coord.start.x = priv.swipe.touch.clientX;
+    priv.swipe.coord.start.y = priv.swipe.touch.clientY;
+}
 
-  if ( priv.swipe.touches.length !== 1 ) return;
+priv.container.addEventListener( 'touchstart', priv.swipeStart );
 
-  priv.swipe.touch = e.changedTouches[0];
-
-  priv.swipe.coord.start.x = priv.swipe.touch.clientX;
-  priv.swipe.coord.start.y = priv.swipe.touch.clientY;
-
-  // console.log( 'Touchstart x : ' + priv.swipe.coord.start.x ); 
-  // console.log( 'Touchstart y : ' + priv.swipe.coord.start.y );
-
-});
-
-priv.container.addEventListener( 'touchend', function ( e ) {
+/* Метод для обработчика touchend получает конечные точки касания и
+сравнивает координаты по оси xy для запуска смещения wrapper */
+priv.swipeEnd = function ( e ) {
   var wrapper, currentSection;
-
-  priv.swipe.touch = e.changedTouches[0];
-
-  priv.swipe.coord.end.x = priv.swipe.touch.clientX;
-  priv.swipe.coord.end.y = priv.swipe.touch.clientY;
 
   wrapper = priv.container.getElementsByClassName( priv.comp.wrapper );
   currentSection = wrapper[0].getElementsByClassName( priv.comp.section );
 
+  priv.swipe.touch = e.changedTouches[0];
+  priv.swipe.coord.end.x = priv.swipe.touch.clientX;
+  priv.swipe.coord.end.y = priv.swipe.touch.clientY;
+
+  if ( Math.abs( priv.swipe.coord.start.x - priv.swipe.coord.end.x ) >= 
+    Math.abs( priv.swipe.coord.start.y - priv.swipe.coord.end.y ) ) return;
+  
   if ( priv.counterSection !== currentSection.length - 1 
   && priv.swipe.coord.start.y > priv.swipe.coord.end.y ) 
-  ++priv.counterSection
+    ++priv.counterSection
   else if ( priv.counterSection !== 0 &&
   priv.swipe.coord.start.y < priv.swipe.coord.end.y ) 
-  --priv.counterSection;
+    --priv.counterSection;
 
   wrapper[0].classList.add( 'active' );
-  wrapper[0].style.transform = 'translateY(-'+ currentSection[priv.counterSection].offsetTop +'px)';
+  wrapper[0].style.transform = 'translateY(-' + currentSection[priv.counterSection].offsetTop + 'px)';
 
-  // console.log( 'Touchend x : ' + priv.swipe.coord.end.x );
-  // console.log( 'Touchend y : ' + priv.swipe.coord.end.y ); 
-});
+}
+
+priv.container.addEventListener( 'touchend', priv.swipeEnd );
 
 // End contsr
 }
