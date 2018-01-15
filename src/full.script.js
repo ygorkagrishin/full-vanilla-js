@@ -123,23 +123,28 @@ priv.navigator = (function () {
 
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
 priv.draw = function ( e ) {
-  var target = e.target, wrap, getValue, offset;
+  var target = e.target, wrapper, sections, currentSection, value, offset;
+  
+  wrapper = priv.container.getElementsByClassName( priv.comp.wrapper )[0];
+  sections = wrapper.getElementsByClassName( priv.comp.section );
 
-  if ( target.hasAttribute( priv.label.name ) ) { 
-    if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
-    
-    getValue = target.getAttribute( priv.label.name );
-      
-    for ( var i = 0; i<= priv.sections.length - 1; i++ ) { 
-      if ( priv.sections[i].hasAttribute( priv.label.name ) ) { 
-        if ( priv.sections[i].getAttribute( priv.label.name ) === getValue ) {
-        offset = priv.sections[i].offsetTop;
-        wrap = priv.container.getElementsByClassName( priv.comp.wrapper );
-        wrap[0].style.transform = 'translateY(-'+ offset +'px)';
-        priv.counterSection = i;
-        }
-      }
-    }
+  if ( target.hasAttribute( priv.label.name ) ) {
+  
+  if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
+  
+  value = target.getAttribute( priv.label.name );
+
+  for ( var i = 0; i <= sections.length - 1; i++ )
+  if ( sections[i].hasAttribute( priv.label.name ) && 
+  sections[i].getAttribute( priv.label.name ) === value )
+  priv.counterSection = i;
+
+  currentSection = sections[priv.counterSection];
+  offset = currentSection.offsetTop;
+
+  wrapper.classList.add( 'active' );
+  wrapper.style.transform = 'translateY(-' + offset + 'px)';
+
   }
 }
 
@@ -157,8 +162,8 @@ priv.container.addEventListener( 'touchstart', function ( e ) {
   priv.swipe.coord.start.x = priv.swipe.touch.clientX;
   priv.swipe.coord.start.y = priv.swipe.touch.clientY;
 
-  console.log( 'Touchstart x : ' + priv.swipe.coord.start.x ); 
-  console.log( 'Touchstart y : ' + priv.swipe.coord.start.y );
+  // console.log( 'Touchstart x : ' + priv.swipe.coord.start.x ); 
+  // console.log( 'Touchstart y : ' + priv.swipe.coord.start.y );
 
 });
 
@@ -183,8 +188,8 @@ priv.container.addEventListener( 'touchend', function ( e ) {
   wrapper[0].classList.add( 'active' );
   wrapper[0].style.transform = 'translateY(-'+ currentSection[priv.counterSection].offsetTop +'px)';
 
-  console.log( 'Touchend x : ' + priv.swipe.coord.end.x );
-  console.log( 'Touchend y : ' + priv.swipe.coord.end.y ); 
+  // console.log( 'Touchend x : ' + priv.swipe.coord.end.x );
+  // console.log( 'Touchend y : ' + priv.swipe.coord.end.y ); 
 });
 
 // End contsr
