@@ -12,7 +12,11 @@ priv.default = {
     section :  'section',
     navigator : priv.param.navigator !== undefined ? priv.param.navigator : false,
     scrollbar : priv.param.scrollbar !== undefined ? priv.param.scrollbar : false,
-    autoplay : priv.param.autoplay !== undefined ? priv.param.autoplay : false,
+    autoplay : {
+      init : priv.param.autoplay !== undefined ? priv.param.autoplay.init : false,
+      loop : priv.param.autoplay !== undefined ? priv.param.autoplay.loop : false,
+      delay : priv.param.autoplay !== undefined ? priv.param.autoplay.delay : 3000,
+    },
     duration : priv.param.duration !== undefined ? priv.param.duration : 700,
 }
 
@@ -68,7 +72,7 @@ priv.label = {
     array : priv.param.label
 }
 
-/* Динамическая обертка внутри контейнера для перемещения. */
+/* Динамическая обертка внутри контейнера для перемещения. В которой будут хрониться только секции */
 priv.wrap = (function () {
   var wrap, content;
 
@@ -84,7 +88,7 @@ priv.wrap = (function () {
 })();
 
 /* Динамическая обертка для секций устанавливающая их высоту равной высоте окна.
-Так же метод перезаписывает priv.sections присваивая новую коллекцию элементов. */
+Так же метод записывает новую коллекцию элементов в свойсвто comp. */
 priv.section = ( function () {
   var currentSection, newSection, clone;
 
@@ -116,7 +120,7 @@ if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
       priv.comp.sect.el[i].setAttribute( priv.label.name, priv.label.array[i] );
 })();
 
-/* Метод, создает навигационную панель */
+/* Метод, создает навигационную панель и записывает новые элементы в свойвтво comp*/
 if ( priv.default.navigator && priv.label.array !== undefined && Array.isArray( priv.label.array ) )
 priv.navigator = (function () {
   var navigator, item, link;
@@ -144,7 +148,7 @@ priv.navigator = (function () {
 
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
 priv.moveTo = function ( e ) {
-  if ( priv.default.autoplay ) priv.default.autoplay = false;
+  if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
 
   var target = e.target, value;
 
@@ -186,6 +190,13 @@ priv.moveUp = function () {
   setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
 }
 
+/* Метод устанавливает обертке дефолтные значения */
+priv.moveDefault = function () {
+  priv.counterSection = 0;
+  priv.comp.wrap.el[0].style.transition = '0ms';
+  priv.comp.wrap.el[0].style.transform = 'translateY(' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+}
+
 /* Метод для обработчика touchstart получает начальные координаты касания */
 priv.swipeStart = function ( e ) {
     priv.swipe.touch = e.changedTouches[0];
@@ -198,7 +209,7 @@ priv.container.addEventListener( 'touchstart', priv.swipeStart );
 /* Метод для обработчика touchend получает конечные точки касания и
 сравнивает координаты по оси xy для запуска смещения wrapper */
 priv.swipeEnd = function ( e ) {
-  if ( priv.default.autoplay ) priv.default.autoplay = false;
+  if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
 
   priv.swipe.touch = e.changedTouches[0];
   priv.swipe.coord.end.x = priv.swipe.touch.clientX;
@@ -219,6 +230,7 @@ priv.swipeEnd = function ( e ) {
 }
 
 priv.container.addEventListener( 'touchend', priv.swipeEnd );
+
 // End contsr
 }
 
@@ -227,5 +239,5 @@ var full = new Full({
     label : [ '1', '2', '3' ],
     navigator : true,
     scrollbar : true,
-    autoplay : true
+    autoplay : { init : true, loop : true, delay : 1000 }
 });
