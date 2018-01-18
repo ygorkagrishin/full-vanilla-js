@@ -11,7 +11,9 @@ priv.default = {
     container : 'full',
     section :  'section',
     navigator : priv.param.navigator !== undefined ? priv.param.navigator : false,
-    duration : 700
+    scrollbar : priv.param.scrollbar !== undefined ? priv.param.scrollbar : false,
+    autoplay : priv.param.autoplay !== undefined ? priv.param.autoplay : false,
+    duration : priv.param.duration !== undefined ? priv.param.duration : 700,
 }
 
 priv.container = document.getElementById( priv.default.container );
@@ -20,19 +22,32 @@ priv.sections = priv.container.getElementsByClassName( priv.default.section );
 
 /* В объект записываются имена классов, которые впоследствии будут присвоены новым элементам. */
 priv.comp = {
-    wrapper : 'js-full__wrapper',
-    section : 'js-full__section',
-    navigator : {
-        name : 'js-full__nav',
-        item : 'js-full__item',
-        link : 'js-full__link'
+  wrap : {
+    cls : 'js-full__wrapper',
+    el : null
+  },
+  sect : {
+    cls : 'js-full__section',
+    el : null
+  },
+  nav : {
+    list : {
+      cls : 'js-full__nav',
+      el : null
+    },
+    item : {
+      cls : 'js-full__item',
+      el : null
+    },
+    link : {
+      cls : 'js-full__link',
+      el : null
     }
+  }
 }
 
 priv.swipe = {
   touch : false,
-  start : false,
-  detecting : false,
   coord : {
     start : {
       x : null,
@@ -53,40 +68,42 @@ priv.label = {
     array : priv.param.label
 }
 
+/* Динамическая обертка внутри контейнера для перемещения. */
+priv.wrap = (function () {
+  var wrap, content;
+
+  wrap = document.createElement( 'div' ),
+  content = priv.container.innerHTML;
+    
+  priv.container.innerHTML= ' ';    
+  priv.container.appendChild( wrap );
+  wrap.classList.add( priv.comp.wrap.cls );
+  wrap.innerHTML = content;   
+  
+  priv.comp.wrap.el = priv.container.getElementsByClassName( priv.comp.wrap.cls );
+})();
+
 /* Динамическая обертка для секций устанавливающая их высоту равной высоте окна.
 Так же метод перезаписывает priv.sections присваивая новую коллекцию элементов. */
 priv.section = ( function () {
-  var currentSection, clone, newSection;
-  
+  var currentSection, newSection, clone;
+
   for ( var i = 0; i <= priv.sections.length - 1; i++) {
     currentSection = priv.sections[i],
     clone = currentSection.cloneNode( true ),
     newSection = document.createElement( 'div' );
       
-    priv.container.replaceChild( newSection, currentSection );
-    newSection.classList.add( priv.comp.section ),
+    priv.comp.wrap.el[0].replaceChild( newSection, currentSection );
+    newSection.classList.add( priv.comp.sect.cls ),
     newSection.appendChild( clone ); }
   
-  priv.sections = priv.container.getElementsByClassName( priv.comp.section );
-})();
-
-/* Динамическая обертка внутри контейнера для перемещения. */
-priv.wrapper = (function () {
-  var wrapper, content;
-
-  wrapper = document.createElement( 'div' ),
-  content = priv.container.innerHTML;
-    
-  priv.container.innerHTML= ' ';    
-  priv.container.appendChild( wrapper );
-  wrapper.classList.add( priv.comp.wrapper );
-  wrapper.innerHTML = content;    
+  priv.comp.sect.el = priv.container.getElementsByClassName( priv.comp.sect.cls );
 })();
 
 /* Метод устанавливает высоту оберткам секций равной высоте окна. */
 priv.setHeight = ( function () {
-  for ( var i = 0; i <= priv.sections.length - 1; i++ ) 
-    priv.sections[i].style.height = window.innerHeight + 'px';
+  for ( var i = 0; i <= priv.comp.sect.el.length - 1; i++ ) 
+    priv.comp.sect.el[i].style.height = window.innerHeight + 'px';
 })();
 
 
@@ -95,8 +112,8 @@ priv.setHeight = ( function () {
 if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
   priv.data = (function () {
   for ( var i = 0; i <= priv.sections.length - 1; i++ )
-    if ( !priv.sections[i].hasAttribute( priv.label[i] ) )
-      priv.sections[i].setAttribute( priv.label.name, priv.label.array[i] );
+    if ( !priv.comp.sect.el[i].hasAttribute( priv.label[i] ) )
+      priv.comp.sect.el[i].setAttribute( priv.label.name, priv.label.array[i] );
 })();
 
 /* Метод, создает навигационную панель */
@@ -106,45 +123,68 @@ priv.navigator = (function () {
 
   navigator = document.createElement( 'ul' );
   priv.container.appendChild( navigator );
-  navigator.classList.add( priv.comp.navigator.name );
+  navigator.classList.add( priv.comp.nav.list.cls );
   
   for ( var i = 0; i <= priv.label.array.length - 1; i++ ) {
     item = document.createElement( 'li' );
     navigator.appendChild( item );
     
-    item.classList.add( priv.comp.navigator.item );
+    item.classList.add( priv.comp.nav.item.cls );
     link = document.createElement( 'a' );
     item.appendChild( link );
-    link.classList.add( priv.comp.navigator.link );
+    link.classList.add( priv.comp.nav.link.cls );
     
   if ( !link.hasAttribute( priv.label.name ) )
     link.setAttribute( priv.label.name, priv.label.array[i] ); }
+
+    priv.comp.nav.list.el = priv.container.getElementsByClassName( priv.comp.nav.list.cls );
+    priv.comp.nav.item.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.item.cls );
+    priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
 })();
 
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
-priv.draw = function ( e ) {
-  var target = e.target, wrapper, sections, value;
-  
-  wrapper = priv.container.getElementsByClassName( priv.comp.wrapper );
-  sections = wrapper[0].getElementsByClassName( priv.comp.section );
+priv.moveTo = function ( e ) {
+  if ( priv.default.autoplay ) priv.default.autoplay = false;
+
+  var target = e.target, value;
 
   if ( target.hasAttribute( priv.label.name ) ) {
-  
   if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
   
   value = target.getAttribute( priv.label.name );
-  for ( var i = 0; i <= sections.length - 1; i++ )
-    if ( sections[i].hasAttribute( priv.label.name ) && 
-    sections[i].getAttribute( priv.label.name ) === value )
+  
+  for ( var i = 0; i <= priv.sections.length - 1; i++ )
+    if ( priv.comp.sect.el[i].hasAttribute( priv.label.name ) && 
+      priv.comp.sect.el[i].getAttribute( priv.label.name ) === value )
       priv.counterSection = i;
 
-  wrapper[0].classList.add( 'active' );
-  wrapper[0].style.transform = 'translateY(-' + sections[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
   }
 }
 
 /* Обработчик события скролл при клике по элементу с атрибутом data- */
-if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click', priv.draw );
+if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click', priv.moveTo );
+
+/*  Метод смещает обертку вверх  */
+priv.moveDown = function () {
+  ++priv.counterSection;
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+}
+
+/*  Метод смещает обертку вниз  */
+priv.moveUp = function () {
+  --priv.counterSection;
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+}
 
 /* Метод для обработчика touchstart получает начальные координаты касания */
 priv.swipeStart = function ( e ) {
@@ -158,10 +198,7 @@ priv.container.addEventListener( 'touchstart', priv.swipeStart );
 /* Метод для обработчика touchend получает конечные точки касания и
 сравнивает координаты по оси xy для запуска смещения wrapper */
 priv.swipeEnd = function ( e ) {
-  var wrapper, currentSection;
-
-  wrapper = priv.container.getElementsByClassName( priv.comp.wrapper );
-  currentSection = wrapper[0].getElementsByClassName( priv.comp.section );
+  if ( priv.default.autoplay ) priv.default.autoplay = false;
 
   priv.swipe.touch = e.changedTouches[0];
   priv.swipe.coord.end.x = priv.swipe.touch.clientX;
@@ -170,25 +207,25 @@ priv.swipeEnd = function ( e ) {
   if ( Math.abs( priv.swipe.coord.start.x - priv.swipe.coord.end.x ) >= 
     Math.abs( priv.swipe.coord.start.y - priv.swipe.coord.end.y ) ) return;
   
-  if ( priv.counterSection !== currentSection.length - 1 
+  if ( priv.counterSection !== priv.comp.sect.el.length - 1 
   && priv.swipe.coord.start.y > priv.swipe.coord.end.y ) 
-    ++priv.counterSection
+    priv.moveDown();
   else if ( priv.counterSection !== 0 &&
   priv.swipe.coord.start.y < priv.swipe.coord.end.y ) 
-    --priv.counterSection;
+    priv.moveUp();
 
-  wrapper[0].classList.add( 'active' );
-  wrapper[0].style.transform = 'translateY(-' + currentSection[priv.counterSection].offsetTop + 'px)';
-
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
 }
 
 priv.container.addEventListener( 'touchend', priv.swipeEnd );
-
 // End contsr
 }
 
 var full = new Full({
     container : 'full',
-    label : [ 'hero', 'main', 'footer' ],
-    navigator : true
+    label : [ '1', '2', '3' ],
+    navigator : true,
+    scrollbar : true,
+    autoplay : true
 });
