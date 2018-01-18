@@ -123,7 +123,8 @@ if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
 /* Метод, создает навигационную панель и записывает новые элементы в свойвтво comp*/
 if ( priv.default.navigator && priv.label.array !== undefined && Array.isArray( priv.label.array ) )
 priv.navigator = (function () {
-  var navigator, item, link;
+  var navigator, item, link, containerOffsetHeight,
+  navigatorOffsetHeight;
 
   navigator = document.createElement( 'ul' );
   priv.container.appendChild( navigator );
@@ -141,9 +142,15 @@ priv.navigator = (function () {
   if ( !link.hasAttribute( priv.label.name ) )
     link.setAttribute( priv.label.name, priv.label.array[i] ); }
 
-    priv.comp.nav.list.el = priv.container.getElementsByClassName( priv.comp.nav.list.cls );
-    priv.comp.nav.item.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.item.cls );
-    priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
+  /* Центровка навигационной панели */
+  containerOffsetHeight = Math.round( priv.container.offsetHeight / 2 );
+  navigatorOffsetHeight = Math.round( navigator.offsetHeight / 2 );
+
+  navigator.style.top = containerOffsetHeight - navigatorOffsetHeight + 'px';
+
+  priv.comp.nav.list.el = priv.container.getElementsByClassName( priv.comp.nav.list.cls );
+  priv.comp.nav.item.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.item.cls );
+  priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
 })();
 
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
