@@ -15,9 +15,9 @@ priv.default = {
     autoplay : {
       init : priv.param.autoplay !== undefined ? priv.param.autoplay.init : false,
       loop : priv.param.autoplay !== undefined ? priv.param.autoplay.loop : false,
-      delay : priv.param.autoplay !== undefined ? priv.param.autoplay.delay : 3000,
+      delay : priv.param.autoplay !== undefined ? priv.param.autoplay.delay : 7000,
     },
-    duration : priv.param.duration !== undefined ? priv.param.duration : 700,
+    duration : priv.param.duration !== undefined ? priv.param.duration : 700
 }
 
 priv.container = document.getElementById( priv.default.container );
@@ -64,13 +64,14 @@ priv.swipe = {
   }
 }
 
-priv.counterSection = 0;
-
 /* Массив со значениями для data-anchor. */
 priv.label = {
     name : 'data-full',
     array : priv.param.label
 }
+
+/* Счетчик секций */
+priv.counterSection = 0;
 
 /* Динамическая обертка внутри контейнера для перемещения. В которой будут хрониться только секции */
 priv.wrap = (function () {
@@ -166,7 +167,7 @@ priv.moveTo = function ( e ) {
   
   for ( var i = 0; i <= priv.sections.length - 1; i++ )
     if ( priv.comp.sect.el[i].hasAttribute( priv.label.name ) && 
-      priv.comp.sect.el[i].getAttribute( priv.label.name ) === value )
+    priv.comp.sect.el[i].getAttribute( priv.label.name ) === value )
       priv.counterSection = i;
 
   priv.comp.wrap.el[0].classList.add( 'active' );
@@ -231,12 +232,63 @@ priv.swipeEnd = function ( e ) {
   else if ( priv.counterSection !== 0 &&
   priv.swipe.coord.start.y < priv.swipe.coord.end.y ) 
     priv.moveUp();
-
-  priv.comp.wrap.el[0].classList.add( 'active' );
-  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
 }
 
 priv.container.addEventListener( 'touchend', priv.swipeEnd );
+
+/* Если установлен флаг autoplay : true, а флаг loop : false то выполняеться метод
+прокурчивающий страницу до конца */
+if ( priv.default.autoplay.init && !priv.default.autoplay.loop )
+priv.player = (function () {
+  var start, timerId, restart = priv.default.autoplay.delay;
+
+  start = function () {
+    timerId = setTimeout( function () {
+      priv.moveDown();
+      priv.default.autoplay.init && priv.counterSection !== priv.comp.sect.el.length - 1 ? 
+      start() : clearTimeout( timerId );
+    }, restart );
+  }
+
+  start();
+
+})();
+
+/* Если установлен флаг autoplay : true и loop : true то метод
+зацыкливает прокрутку страницы  */
+if ( priv.default.autoplay.init && priv.default.autoplay.loop )
+priv.loop = (function () {
+  var clone, start, timerId, restart = priv.default.autoplay.delay;
+  
+  /* Клонируем первую секцию, удаляем ей атрибут data- и вставляем в конец */
+  clone = priv.comp.sect.el[0].cloneNode( true );
+  clone.removeAttribute( priv.label.name );
+  priv.comp.wrap.el[0].appendChild( clone );
+
+  start = function () {
+    timerId = setTimeout( function () {
+      
+      if ( priv.default.autoplay.init ) {
+        start();
+        if ( priv.counterSection !== priv.comp.sect.el.length - 1 ) {
+          priv.moveDown();
+        }
+        else {
+          priv.moveDefault();
+          setTimeout( priv.moveDown(), 20 );
+        }
+      }
+      else {
+        clearTimeout( timerId );
+        priv.comp.wrap.el[0].removeChild( priv.comp.sect.el[priv.comp.sect.el.length - 1] );
+      }
+
+    }, restart );
+  }
+
+  start();
+
+})();
 
 // End contsr
 }
@@ -245,6 +297,5 @@ var full = new Full({
     container : 'full',
     label : [ '1', '2', '3' ],
     navigator : true,
-    scrollbar : true,
-    autoplay : { init : true, loop : true, delay : 1000 }
+    autoplay : { init : true, loop : true, delay : 1500 }
 });

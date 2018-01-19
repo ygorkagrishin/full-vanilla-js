@@ -1,1 +1,301 @@
-var Full=function(e){"use strict";var t,a,l={};l.param=e,l.default={container:"full",section:"section",navigator:void 0!==l.param.navigator&&l.param.navigator,scrollbar:void 0!==l.param.scrollbar&&l.param.scrollbar,autoplay:{init:void 0!==l.param.autoplay&&l.param.autoplay.init,loop:void 0!==l.param.autoplay&&l.param.autoplay.loop,delay:void 0!==l.param.autoplay?l.param.autoplay.delay:3e3},duration:void 0!==l.param.duration?l.param.duration:700},l.container=document.getElementById(l.default.container),l.sections=l.container.getElementsByClassName(l.default.section),l.comp={wrap:{cls:"js-full__wrapper",el:null},sect:{cls:"js-full__section",el:null},nav:{list:{cls:"js-full__nav",el:null},item:{cls:"js-full__item",el:null},link:{cls:"js-full__link",el:null}}},l.swipe={touch:!1,coord:{start:{x:null,y:null},end:{x:null,y:null}}},l.counterSection=0,l.label={name:"data-full",array:l.param.label},l.wrap=(t=document.createElement("div"),a=l.container.innerHTML,l.container.innerHTML=" ",l.container.appendChild(t),t.classList.add(l.comp.wrap.cls),t.innerHTML=a,void(l.comp.wrap.el=l.container.getElementsByClassName(l.comp.wrap.cls))),l.section=function(){for(var e,t,a,o=0;o<=l.sections.length-1;o++)a=(e=l.sections[o]).cloneNode(!0),t=document.createElement("div"),l.comp.wrap.el[0].replaceChild(t,e),t.classList.add(l.comp.sect.cls),t.appendChild(a);l.comp.sect.el=l.container.getElementsByClassName(l.comp.sect.cls)}(),l.setHeight=function(){for(var e=0;e<=l.comp.sect.el.length-1;e++)l.comp.sect.el[e].style.height=window.innerHeight+"px"}(),void 0!==l.label.array&&Array.isArray(l.label.array)&&(l.data=function(){for(var e=0;e<=l.sections.length-1;e++)l.comp.sect.el[e].hasAttribute(l.label[e])||l.comp.sect.el[e].setAttribute(l.label.name,l.label.array[e])}()),l.default.navigator&&void 0!==l.label.array&&Array.isArray(l.label.array)&&(l.navigator=function(){var e,t,a,o,n;e=document.createElement("ul"),l.container.appendChild(e),e.classList.add(l.comp.nav.list.cls);for(var c=0;c<=l.label.array.length-1;c++)t=document.createElement("li"),e.appendChild(t),t.classList.add(l.comp.nav.item.cls),a=document.createElement("a"),t.appendChild(a),a.classList.add(l.comp.nav.link.cls),a.hasAttribute(l.label.name)||a.setAttribute(l.label.name,l.label.array[c]);o=Math.round(l.container.offsetHeight/2),n=Math.round(e.offsetHeight/2),e.style.top=o-n+"px",l.comp.nav.list.el=l.container.getElementsByClassName(l.comp.nav.list.cls),l.comp.nav.item.el=l.comp.nav.list.el[0].getElementsByClassName(l.comp.nav.item.cls),l.comp.nav.link.el=l.comp.nav.list.el[0].getElementsByClassName(l.comp.nav.link.cls)}()),l.moveTo=function(e){l.default.autoplay.init&&(l.default.autoplay.init=!1);var t,a=e.target;if(a.hasAttribute(l.label.name)){"a"===a.tagName.toLowerCase()&&e.preventDefault(),t=a.getAttribute(l.label.name);for(var o=0;o<=l.sections.length-1;o++)l.comp.sect.el[o].hasAttribute(l.label.name)&&l.comp.sect.el[o].getAttribute(l.label.name)===t&&(l.counterSection=o);l.comp.wrap.el[0].classList.add("active"),l.comp.wrap.el[0].style.transform="translateY(-"+l.comp.sect.el[l.counterSection].offsetTop+"px)",l.comp.wrap.el[0].style.transition="all "+l.default.duration+"ms ease-out",setTimeout(function(){l.comp.wrap.el[0].classList.remove("active")},l.default.duration)}},Array.isArray(l.label.array)&&l.container.addEventListener("click",l.moveTo),l.moveDown=function(){++l.counterSection,l.comp.wrap.el[0].classList.add("active"),l.comp.wrap.el[0].style.transform="translateY(-"+l.comp.sect.el[l.counterSection].offsetTop+"px)",l.comp.wrap.el[0].style.transition="all "+l.default.duration+"ms ease-out",setTimeout(function(){l.comp.wrap.el[0].classList.remove("active")},l.default.duration)},l.moveUp=function(){--l.counterSection,l.comp.wrap.el[0].classList.add("active"),l.comp.wrap.el[0].style.transform="translateY(-"+l.comp.sect.el[l.counterSection].offsetTop+"px)",l.comp.wrap.el[0].style.transition="all "+l.default.duration+"ms ease-out",setTimeout(function(){l.comp.wrap.el[0].classList.remove("active")},l.default.duration)},l.moveDefault=function(){l.counterSection=0,l.comp.wrap.el[0].style.transition="0ms",l.comp.wrap.el[0].style.transform="translateY("+l.comp.sect.el[l.counterSection].offsetTop+"px)"},l.swipeStart=function(e){l.swipe.touch=e.changedTouches[0],l.swipe.coord.start.x=l.swipe.touch.clientX,l.swipe.coord.start.y=l.swipe.touch.clientY},l.container.addEventListener("touchstart",l.swipeStart),l.swipeEnd=function(e){l.default.autoplay.init&&(l.default.autoplay.init=!1),l.swipe.touch=e.changedTouches[0],l.swipe.coord.end.x=l.swipe.touch.clientX,l.swipe.coord.end.y=l.swipe.touch.clientY,Math.abs(l.swipe.coord.start.x-l.swipe.coord.end.x)>=Math.abs(l.swipe.coord.start.y-l.swipe.coord.end.y)||(l.counterSection!==l.comp.sect.el.length-1&&l.swipe.coord.start.y>l.swipe.coord.end.y?l.moveDown():0!==l.counterSection&&l.swipe.coord.start.y<l.swipe.coord.end.y&&l.moveUp(),l.comp.wrap.el[0].classList.add("active"),l.comp.wrap.el[0].style.transform="translateY(-"+l.comp.sect.el[l.counterSection].offsetTop+"px)")},l.container.addEventListener("touchend",l.swipeEnd)},full=new Full({container:"full",label:["1","2","3"],navigator:!0,scrollbar:!0,autoplay:{init:!0,loop:!0,delay:1e3}});
+var Full = function ( param ) {
+'use strict';
+
+var self = this;
+
+var priv = {};
+
+priv.param = param;
+
+priv.default = {
+    container : 'full',
+    section :  'section',
+    navigator : priv.param.navigator !== undefined ? priv.param.navigator : false,
+    scrollbar : priv.param.scrollbar !== undefined ? priv.param.scrollbar : false,
+    autoplay : {
+      init : priv.param.autoplay !== undefined ? priv.param.autoplay.init : false,
+      loop : priv.param.autoplay !== undefined ? priv.param.autoplay.loop : false,
+      delay : priv.param.autoplay !== undefined ? priv.param.autoplay.delay : 7000,
+    },
+    duration : priv.param.duration !== undefined ? priv.param.duration : 700
+}
+
+priv.container = document.getElementById( priv.default.container );
+
+priv.sections = priv.container.getElementsByClassName( priv.default.section );
+
+/* В объект записываются имена классов, которые впоследствии будут присвоены новым элементам. */
+priv.comp = {
+  wrap : {
+    cls : 'js-full__wrapper',
+    el : null
+  },
+  sect : {
+    cls : 'js-full__section',
+    el : null
+  },
+  nav : {
+    list : {
+      cls : 'js-full__nav',
+      el : null
+    },
+    item : {
+      cls : 'js-full__item',
+      el : null
+    },
+    link : {
+      cls : 'js-full__link',
+      el : null
+    }
+  }
+}
+
+priv.swipe = {
+  touch : false,
+  coord : {
+    start : {
+      x : null,
+      y : null
+    },
+    end : {
+      x : null,
+      y : null
+    }
+  }
+}
+
+/* Массив со значениями для data-anchor. */
+priv.label = {
+    name : 'data-full',
+    array : priv.param.label
+}
+
+/* Счетчик секций */
+priv.counterSection = 0;
+
+/* Динамическая обертка внутри контейнера для перемещения. В которой будут хрониться только секции */
+priv.wrap = (function () {
+  var wrap, content;
+
+  wrap = document.createElement( 'div' ),
+  content = priv.container.innerHTML;
+    
+  priv.container.innerHTML= ' ';    
+  priv.container.appendChild( wrap );
+  wrap.classList.add( priv.comp.wrap.cls );
+  wrap.innerHTML = content;   
+  
+  priv.comp.wrap.el = priv.container.getElementsByClassName( priv.comp.wrap.cls );
+})();
+
+/* Динамическая обертка для секций устанавливающая их высоту равной высоте окна.
+Так же метод записывает новую коллекцию элементов в свойсвто comp. */
+priv.section = ( function () {
+  var currentSection, newSection, clone;
+
+  for ( var i = 0; i <= priv.sections.length - 1; i++) {
+    currentSection = priv.sections[i],
+    clone = currentSection.cloneNode( true ),
+    newSection = document.createElement( 'div' );
+      
+    priv.comp.wrap.el[0].replaceChild( newSection, currentSection );
+    newSection.classList.add( priv.comp.sect.cls ),
+    newSection.appendChild( clone ); }
+  
+  priv.comp.sect.el = priv.container.getElementsByClassName( priv.comp.sect.cls );
+})();
+
+/* Метод устанавливает высоту оберткам секций равной высоте окна. */
+priv.setHeight = ( function () {
+  for ( var i = 0; i <= priv.comp.sect.el.length - 1; i++ ) 
+    priv.comp.sect.el[i].style.height = window.innerHeight + 'px';
+})();
+
+
+/* Если свойство объекта не undefined и является массивом, 
+то метод проходит циклом по секциям и устанавливает атрибут data-anchor. */
+if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
+  priv.data = (function () {
+  for ( var i = 0; i <= priv.sections.length - 1; i++ )
+    if ( !priv.comp.sect.el[i].hasAttribute( priv.label[i] ) )
+      priv.comp.sect.el[i].setAttribute( priv.label.name, priv.label.array[i] );
+})();
+
+/* Метод, создает навигационную панель и записывает новые элементы в свойвтво comp*/
+if ( priv.default.navigator && priv.label.array !== undefined && Array.isArray( priv.label.array ) )
+priv.navigator = (function () {
+  var navigator, item, link, containerOffsetHeight,
+  navigatorOffsetHeight;
+
+  navigator = document.createElement( 'ul' );
+  priv.container.appendChild( navigator );
+  navigator.classList.add( priv.comp.nav.list.cls );
+  
+  for ( var i = 0; i <= priv.label.array.length - 1; i++ ) {
+    item = document.createElement( 'li' );
+    navigator.appendChild( item );
+    
+    item.classList.add( priv.comp.nav.item.cls );
+    link = document.createElement( 'a' );
+    item.appendChild( link );
+    link.classList.add( priv.comp.nav.link.cls );
+    
+  if ( !link.hasAttribute( priv.label.name ) )
+    link.setAttribute( priv.label.name, priv.label.array[i] ); }
+
+  /* Центровка навигационной панели */
+  containerOffsetHeight = Math.round( priv.container.offsetHeight / 2 );
+  navigatorOffsetHeight = Math.round( navigator.offsetHeight / 2 );
+
+  navigator.style.top = containerOffsetHeight - navigatorOffsetHeight + 'px';
+
+  priv.comp.nav.list.el = priv.container.getElementsByClassName( priv.comp.nav.list.cls );
+  priv.comp.nav.item.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.item.cls );
+  priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
+})();
+
+/* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
+priv.moveTo = function ( e ) {
+  if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
+
+  var target = e.target, value;
+
+  if ( target.hasAttribute( priv.label.name ) ) {
+  if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
+  
+  value = target.getAttribute( priv.label.name );
+  
+  for ( var i = 0; i <= priv.sections.length - 1; i++ )
+    if ( priv.comp.sect.el[i].hasAttribute( priv.label.name ) && 
+    priv.comp.sect.el[i].getAttribute( priv.label.name ) === value )
+      priv.counterSection = i;
+
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+  }
+}
+
+/* Обработчик события скролл при клике по элементу с атрибутом data- */
+if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click', priv.moveTo );
+
+/*  Метод смещает обертку вверх  */
+priv.moveDown = function () {
+  ++priv.counterSection;
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+}
+
+/*  Метод смещает обертку вниз  */
+priv.moveUp = function () {
+  --priv.counterSection;
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+}
+
+/* Метод устанавливает обертке дефолтные значения */
+priv.moveDefault = function () {
+  priv.counterSection = 0;
+  priv.comp.wrap.el[0].style.transition = '0ms';
+  priv.comp.wrap.el[0].style.transform = 'translateY(' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+}
+
+/* Метод для обработчика touchstart получает начальные координаты касания */
+priv.swipeStart = function ( e ) {
+    priv.swipe.touch = e.changedTouches[0];
+    priv.swipe.coord.start.x = priv.swipe.touch.clientX;
+    priv.swipe.coord.start.y = priv.swipe.touch.clientY;
+}
+
+priv.container.addEventListener( 'touchstart', priv.swipeStart );
+
+/* Метод для обработчика touchend получает конечные точки касания и
+сравнивает координаты по оси xy для запуска смещения wrapper */
+priv.swipeEnd = function ( e ) {
+  if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
+
+  priv.swipe.touch = e.changedTouches[0];
+  priv.swipe.coord.end.x = priv.swipe.touch.clientX;
+  priv.swipe.coord.end.y = priv.swipe.touch.clientY;
+
+  if ( Math.abs( priv.swipe.coord.start.x - priv.swipe.coord.end.x ) >= 
+    Math.abs( priv.swipe.coord.start.y - priv.swipe.coord.end.y ) ) return;
+  
+  if ( priv.counterSection !== priv.comp.sect.el.length - 1 
+  && priv.swipe.coord.start.y > priv.swipe.coord.end.y ) 
+    priv.moveDown();
+  else if ( priv.counterSection !== 0 &&
+  priv.swipe.coord.start.y < priv.swipe.coord.end.y ) 
+    priv.moveUp();
+}
+
+priv.container.addEventListener( 'touchend', priv.swipeEnd );
+
+/* Если установлен флаг autoplay : true, а флаг loop : false то выполняеться метод
+прокурчивающий страницу до конца */
+if ( priv.default.autoplay.init && !priv.default.autoplay.loop )
+priv.player = (function () {
+  var start, timerId, restart = priv.default.autoplay.delay;
+
+  start = function () {
+    timerId = setTimeout( function () {
+      priv.moveDown();
+      priv.default.autoplay.init && priv.counterSection !== priv.comp.sect.el.length - 1 ? 
+      start() : clearTimeout( timerId );
+    }, restart );
+  }
+
+  start();
+
+})();
+
+/* Если установлен флаг autoplay : true и loop : true то метод
+зацыкливает прокрутку страницы  */
+if ( priv.default.autoplay.init && priv.default.autoplay.loop )
+priv.loop = (function () {
+  var clone, start, timerId, restart = priv.default.autoplay.delay;
+  
+  /* Клонируем первую секцию, удаляем ей атрибут data- и вставляем в конец */
+  clone = priv.comp.sect.el[0].cloneNode( true );
+  clone.removeAttribute( priv.label.name );
+  priv.comp.wrap.el[0].appendChild( clone );
+
+  start = function () {
+    timerId = setTimeout( function () {
+      
+      if ( priv.default.autoplay.init ) {
+        start();
+        if ( priv.counterSection !== priv.comp.sect.el.length - 1 ) {
+          priv.moveDown();
+        }
+        else {
+          priv.moveDefault();
+          setTimeout( priv.moveDown(), 20 );
+        }
+      }
+      else {
+        clearTimeout( timerId );
+        priv.comp.wrap.el[0].removeChild( priv.comp.sect.el[priv.comp.sect.el.length - 1] );
+      }
+
+    }, restart );
+  }
+
+  start();
+
+})();
+
+// End contsr
+}
+
+var full = new Full({
+    container : 'full',
+    label : [ '1', '2', '3' ],
+    navigator : true,
+    autoplay : { init : true, loop : true, delay : 1500 }
+});
