@@ -5,13 +5,12 @@
 .section
     height: 100%;
 
-.nav__list
-    padding: 32px 0;
+.section__row
+    display: flex;
+    height: 100%;
 
-.nav__item
-    display: inline-block;
-    margin: 0 16px;
-    list-style: none;
+.section__col
+    margin: auto;
 
 #full
     height: 100vh;
@@ -21,18 +20,14 @@
     min-height: 100vh;
     will-change: transform;
 
-.red
-    background-color: red;
-
-.orange
-    background-color: orange;
-
-.green
-    background-color: green;
+#full .js-full__section .section 
+    background: #A0522D;
+    & h1, h2, h3, h4, h5, h6
+        font-family: 'Shrikhand', cursive;
+        color: #fff;
 
 .js-full__nav
     position: fixed;
-    top: 35%;
     right: 2%;
 
 .js-full__item

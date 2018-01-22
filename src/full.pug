@@ -6,19 +6,27 @@ html
     meta( name='viewport', content='width=device-width, initial-scale=1' )
     title full
     meta( name='description', content='full' )
+    link( href="https://fonts.googleapis.com/css?family=Shrikhand", rel="stylesheet" )
     link( rel='stylesheet', href='../bower_components/normalize-css/normalize.css' )
     link( rel='stylesheet', href='full.style.css' )
 body
 
 // Full container
 #full
+    section.section.main
+        .section__row
+            .section__col
+                h1 Full Height
     section.section.red
+        .section__row
+            .section__col
+                h1 Section-1
     section.section.orange
+        .section__row
+            .section__col
+                h2 Section-2
     section.section.green
-    section.section.red
-    section.section.orange
-    section.section.green
-    section.section.red
-    
-
+        .section__row
+            .section__col
+                h3 Section-3
 script( src="full.script.js" )

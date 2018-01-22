@@ -275,6 +275,6 @@ priv.player = (function () {
 
 var full = new Full({
     container : 'full',
-    label : [ '1', '2', '3', '4', '5', '6', '7'],
+    label : [ 'main', '1', '2', '3' ],
     navigator : true
 });
