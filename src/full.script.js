@@ -11,10 +11,8 @@ priv.default = {
     container : 'full',
     section :  'section',
     navigator : priv.param.navigator !== undefined ? priv.param.navigator : false,
-    scrollbar : priv.param.scrollbar !== undefined ? priv.param.scrollbar : false,
     autoplay : {
       init : priv.param.autoplay !== undefined ? priv.param.autoplay.init : false,
-      loop : priv.param.autoplay !== undefined ? priv.param.autoplay.loop : false,
       delay : priv.param.autoplay !== undefined ? priv.param.autoplay.delay : 7000,
     },
     duration : priv.param.duration !== undefined ? priv.param.duration : 700
@@ -122,7 +120,7 @@ if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
 })();
 
 /* Метод, создает навигационную панель и записывает новые элементы в свойвтво comp*/
-if ( priv.default.navigator && priv.label.array !== undefined && Array.isArray( priv.label.array ) )
+if ( priv.default.navigator && Array.isArray( priv.label.array ) )
 priv.navigator = (function () {
   var navigator, item, link, containerOffsetHeight,
   navigatorOffsetHeight;
@@ -154,6 +152,17 @@ priv.navigator = (function () {
   priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
 })();
 
+if ( priv.default.navigator && Array.isArray( priv.label.array ) )
+priv.isActive = function () {
+  for ( var i = 0; i <= priv.comp.nav.link.el.length - 1; i++ )
+    if ( priv.comp.nav.link.el[i].classList.contains( 'active' ) )
+      priv.comp.nav.link.el[i].classList.remove( 'active' );
+
+  priv.comp.nav.link.el[priv.counterSection].classList.add( 'active' );
+}
+
+if ( priv.default.navigator && Array.isArray( priv.label.array ) ) priv.isActive();
+
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
 priv.moveTo = function ( e ) {
   if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
@@ -162,7 +171,7 @@ priv.moveTo = function ( e ) {
 
   if ( target.hasAttribute( priv.label.name ) ) {
   if ( target.tagName.toLowerCase() === 'a' ) e.preventDefault();
-  
+
   value = target.getAttribute( priv.label.name );
   
   for ( var i = 0; i <= priv.sections.length - 1; i++ )
@@ -170,6 +179,7 @@ priv.moveTo = function ( e ) {
     priv.comp.sect.el[i].getAttribute( priv.label.name ) === value )
       priv.counterSection = i;
 
+  priv.isActive();
   priv.comp.wrap.el[0].classList.add( 'active' );
   priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
   priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
@@ -183,6 +193,7 @@ if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click
 /*  Метод смещает обертку вверх  */
 priv.moveDown = function () {
   ++priv.counterSection;
+  priv.isActive();
   priv.comp.wrap.el[0].classList.add( 'active' );
   priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
   priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
@@ -192,6 +203,7 @@ priv.moveDown = function () {
 /*  Метод смещает обертку вниз  */
 priv.moveUp = function () {
   --priv.counterSection;
+  priv.isActive();
   priv.comp.wrap.el[0].classList.add( 'active' );
   priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
   priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
@@ -201,6 +213,7 @@ priv.moveUp = function () {
 /* Метод устанавливает обертке дефолтные значения */
 priv.moveDefault = function () {
   priv.counterSection = 0;
+  priv.isActive();
   priv.comp.wrap.el[0].style.transition = '0ms';
   priv.comp.wrap.el[0].style.transform = 'translateY(' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
 }
@@ -245,44 +258,11 @@ priv.player = (function () {
   start = function () {
     timerId = setTimeout( function () {
       priv.moveDown();
-      priv.default.autoplay.init && priv.counterSection !== priv.comp.sect.el.length - 1 ? 
-      start() : clearTimeout( timerId );
-    }, restart );
-  }
-
-  start();
-
-})();
-
-/* Если установлен флаг autoplay : true и loop : true то метод
-зацыкливает прокрутку страницы  */
-if ( priv.default.autoplay.init && priv.default.autoplay.loop )
-priv.loop = (function () {
-  var clone, start, timerId, restart = priv.default.autoplay.delay;
-  
-  /* Клонируем первую секцию, удаляем ей атрибут data- и вставляем в конец */
-  clone = priv.comp.sect.el[0].cloneNode( true );
-  clone.removeAttribute( priv.label.name );
-  priv.comp.wrap.el[0].appendChild( clone );
-
-  start = function () {
-    timerId = setTimeout( function () {
       
-      if ( priv.default.autoplay.init ) {
-        start();
-        if ( priv.counterSection !== priv.comp.sect.el.length - 1 ) {
-          priv.moveDown();
-        }
-        else {
-          priv.moveDefault();
-          setTimeout( priv.moveDown(), 20 );
-        }
-      }
-      else {
+      if ( priv.default.autoplay.init && priv.counterSection !== priv.comp.sect.el.length - 1 )
+        start()
+      else 
         clearTimeout( timerId );
-        priv.comp.wrap.el[0].removeChild( priv.comp.sect.el[priv.comp.sect.el.length - 1] );
-      }
-
     }, restart );
   }
 
@@ -295,7 +275,6 @@ priv.loop = (function () {
 
 var full = new Full({
     container : 'full',
-    label : [ '1', '2', '3' ],
-    navigator : true,
-    autoplay : { init : true, loop : true, delay : 1500 }
+    label : [ '1', '2', '3', '4', '5', '6', '7'],
+    navigator : true
 });

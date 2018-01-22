@@ -34,13 +34,27 @@
     position: fixed;
     top: 35%;
     right: 2%;
-    .js-full__item
-        list-style: none;
-        .js-full__link
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            margin: 12px;
-            background-color: #fff;
-            border-radius: 50%;
-            cursor: pointer;
+
+.js-full__item
+    list-style: none;
+
+.js-full__link
+    position: relative;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 12px;
+    background-color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+
+.js-full__link.active::after
+    content: "";
+    position: absolute;
+    top: -60%;
+    left: -60%;
+    display: block;
+    width: 200%;
+    height: 200%;
+    border: 1px solid #fff;
+    border-radius: 50%;
