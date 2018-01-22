@@ -152,6 +152,7 @@ priv.navigator = (function () {
   priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
 })();
 
+/* Добавляет класс active ссылкам навигационной панели */
 if ( priv.default.navigator && Array.isArray( priv.label.array ) )
 priv.isActive = function () {
   for ( var i = 0; i <= priv.comp.nav.link.el.length - 1; i++ )

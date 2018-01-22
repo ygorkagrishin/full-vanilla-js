@@ -44,7 +44,7 @@ gulp.task( 'styl:build', function () {
 // script
 gulp.task( 'script', function () {
     return gulp.src( path.src.script )
-            //    .pipe( uglify() )
+               .pipe( uglify() )
                .pipe( gulp.dest( path.build.script ) )
 });
 
