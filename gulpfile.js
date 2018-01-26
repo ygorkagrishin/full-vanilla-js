@@ -10,13 +10,15 @@ var gulp = require( 'gulp' ),
         src : {
             pug : 'src/*.pug',
             styl : 'src/*.styl',
-            script : 'src/*.js'
+            script : 'src/*.js',
+            lib : 'bower_components/normalize-css/normalize.css'
         },
 
         build : {
             pug : 'build/',
             styl : 'build/',
-            script : 'build/'
+            script : 'build/',
+            lib : 'build/'
         },
 
         watch : {
@@ -47,6 +49,12 @@ gulp.task( 'script', function () {
                .pipe( uglify() )
                .pipe( gulp.dest( path.build.script ) )
 });
+
+//lib
+gulp.task( 'build:lib', function () {
+    return gulp.src( path.src.lib )
+               .pipe( gulp.dest( path.build.lib ) )
+})
 
 // watch
 gulp.task( 'watch', function () {
