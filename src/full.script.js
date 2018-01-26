@@ -228,6 +228,11 @@ priv.swipeStart = function ( e ) {
 
 priv.container.addEventListener( 'touchstart', priv.swipeStart );
 
+/* Отменяет действие по умолчанию для обработчика touchmove */
+priv.container.addEventListener( 'touchmove', function ( e ) {
+  e.preventDefault();
+});
+
 /* Метод для обработчика touchend получает конечные точки касания и
 сравнивает координаты по оси xy для запуска смещения wrapper */
 priv.swipeEnd = function ( e ) {
@@ -249,10 +254,6 @@ priv.swipeEnd = function ( e ) {
 }
 
 priv.container.addEventListener( 'touchend', priv.swipeEnd );
-
-priv.container.addEventListener( 'touchmove', function ( e ) {
-  e.preventDefault();
-});
 
 /* Если установлен флаг autoplay : true, а флаг loop : false то выполняеться метод
 прокурчивающий страницу до конца */
