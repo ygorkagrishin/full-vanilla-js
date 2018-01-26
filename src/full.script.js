@@ -250,6 +250,10 @@ priv.swipeEnd = function ( e ) {
 
 priv.container.addEventListener( 'touchend', priv.swipeEnd );
 
+priv.container.addEventListener( 'touchmove', function ( e ) {
+  e.preventDefault();
+});
+
 /* Если установлен флаг autoplay : true, а флаг loop : false то выполняеться метод
 прокурчивающий страницу до конца */
 if ( priv.default.autoplay.init && !priv.default.autoplay.loop )
