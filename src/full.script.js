@@ -11,10 +11,6 @@ priv.default = {
     container : 'full',
     section :  'section',
     navigator : priv.param.navigator !== undefined ? priv.param.navigator : false,
-    autoplay : {
-      init : priv.param.autoplay !== undefined ? priv.param.autoplay.init : false,
-      delay : priv.param.autoplay !== undefined ? priv.param.autoplay.delay : 7000,
-    },
     duration : priv.param.duration !== undefined ? priv.param.duration : 700
 }
 
@@ -72,7 +68,7 @@ priv.label = {
 priv.counterSection = 0;
 
 /* Динамическая обертка внутри контейнера для перемещения. В которой будут хрониться только секции */
-priv.wrap = (function () {
+priv.wrap = ( function () {
   var wrap, content;
 
   wrap = document.createElement( 'div' ),
@@ -109,19 +105,18 @@ priv.setHeight = ( function () {
     priv.comp.sect.el[i].style.height = window.innerHeight + 'px';
 })();
 
-
 /* Если свойство объекта не undefined и является массивом, 
 то метод проходит циклом по секциям и устанавливает атрибут data-anchor. */
-if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) )
-  priv.data = (function () {
+priv.data = function () {
   for ( var i = 0; i <= priv.sections.length - 1; i++ )
     if ( !priv.comp.sect.el[i].hasAttribute( priv.label[i] ) )
       priv.comp.sect.el[i].setAttribute( priv.label.name, priv.label.array[i] );
-})();
+}
+
+if ( priv.label.array !== undefined && Array.isArray( priv.label.array ) ) priv.data();
 
 /* Метод, создает навигационную панель и записывает новые элементы в свойвтво comp*/
-if ( priv.default.navigator && Array.isArray( priv.label.array ) )
-priv.navigator = (function () {
+priv.navigator = function () {
   var navigator, item, link, containerOffsetHeight,
   navigatorOffsetHeight;
 
@@ -150,7 +145,9 @@ priv.navigator = (function () {
   priv.comp.nav.list.el = priv.container.getElementsByClassName( priv.comp.nav.list.cls );
   priv.comp.nav.item.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.item.cls );
   priv.comp.nav.link.el = priv.comp.nav.list.el[0].getElementsByClassName( priv.comp.nav.link.cls );
-})();
+}
+
+if ( priv.default.navigator && Array.isArray( priv.label.array ) ) priv.navigator();
 
 /* Добавляет класс active ссылкам навигационной панели */
 if ( priv.default.navigator && Array.isArray( priv.label.array ) )
@@ -164,10 +161,18 @@ priv.isActive = function () {
 
 if ( priv.default.navigator && Array.isArray( priv.label.array ) ) priv.isActive();
 
+priv.move = function () {
+  priv.isActive();
+  priv.comp.wrap.el[0].classList.add( 'active' );
+  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
+  setTimeout( function () { 
+    priv.comp.wrap.el[0].style.transition = null;
+    priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+}
+
 /* Метод, обрабатывающий событие при клике по элементу с атрибутом data- */
 priv.moveTo = function ( e ) {
-  if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
-
   var target = e.target, value;
 
   if ( target.hasAttribute( priv.label.name ) ) {
@@ -180,44 +185,12 @@ priv.moveTo = function ( e ) {
     priv.comp.sect.el[i].getAttribute( priv.label.name ) === value )
       priv.counterSection = i;
 
-  priv.isActive();
-  priv.comp.wrap.el[0].classList.add( 'active' );
-  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
-  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
-  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
+  priv.isActive(); priv.move();
   }
 }
 
 /* Обработчик события скролл при клике по элементу с атрибутом data- */
 if ( Array.isArray( priv.label.array ) ) priv.container.addEventListener( 'click', priv.moveTo );
-
-/*  Метод смещает обертку вверх  */
-priv.moveDown = function () {
-  ++priv.counterSection;
-  priv.isActive();
-  priv.comp.wrap.el[0].classList.add( 'active' );
-  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
-  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
-  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
-}
-
-/*  Метод смещает обертку вниз  */
-priv.moveUp = function () {
-  --priv.counterSection;
-  priv.isActive();
-  priv.comp.wrap.el[0].classList.add( 'active' );
-  priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
-  priv.comp.wrap.el[0].style.transition = 'all ' + priv.default.duration + 'ms ease-out';
-  setTimeout( function () { priv.comp.wrap.el[0].classList.remove( 'active' ); }, priv.default.duration);
-}
-
-/* Метод устанавливает обертке дефолтные значения */
-priv.moveDefault = function () {
-  priv.counterSection = 0;
-  priv.isActive();
-  priv.comp.wrap.el[0].style.transition = '0ms';
-  priv.comp.wrap.el[0].style.transform = 'translateY(' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
-}
 
 /* Метод для обработчика touchstart получает начальные координаты касания */
 priv.swipeStart = function ( e ) {
@@ -236,8 +209,6 @@ priv.container.addEventListener( 'touchmove', function ( e ) {
 /* Метод для обработчика touchend получает конечные точки касания и
 сравнивает координаты по оси xy для запуска смещения wrapper */
 priv.swipeEnd = function ( e ) {
-  if ( priv.default.autoplay.init ) priv.default.autoplay.init = false;
-
   priv.swipe.touch = e.changedTouches[0];
   priv.swipe.coord.end.x = priv.swipe.touch.clientX;
   priv.swipe.coord.end.y = priv.swipe.touch.clientY;
@@ -246,33 +217,40 @@ priv.swipeEnd = function ( e ) {
     Math.abs( priv.swipe.coord.start.y - priv.swipe.coord.end.y ) ) return;
   
   if ( priv.counterSection !== priv.comp.sect.el.length - 1 
-  && priv.swipe.coord.start.y > priv.swipe.coord.end.y ) 
-    priv.moveDown();
+  && priv.swipe.coord.start.y > priv.swipe.coord.end.y ) {
+    ++priv.counterSection; priv.move(); 
+  }
   else if ( priv.counterSection !== 0 &&
-  priv.swipe.coord.start.y < priv.swipe.coord.end.y ) 
-    priv.moveUp();
+  priv.swipe.coord.start.y < priv.swipe.coord.end.y ) { 
+    --priv.counterSection; priv.move();
+   }
 }
 
 priv.container.addEventListener( 'touchend', priv.swipeEnd );
 
-/* Если установлен флаг autoplay : true, а флаг loop : false то выполняеться метод
-прокурчивающий страницу до конца */
-if ( priv.default.autoplay.init && !priv.default.autoplay.loop )
-priv.player = (function () {
-  var start, timerId, restart = priv.default.autoplay.delay;
+/* Метод пересчитывает высоту контейнера */
+priv.resize = ( function () {
+  var resizeTimeout, actualResizeHandler;
+  
+  actualResizeHandler = function ( e ) {
+    var containerOffsetHeight, navigatorOffsetHeight;
 
-  start = function () {
-    timerId = setTimeout( function () {
-      priv.moveDown();
+    if ( !resizeTimeout ) 
+      actualResizeHandler = setTimeout( function () {
+      resizeTimeout = null; 
+
+      for ( var i = 0; i <= priv.comp.sect.el.length - 1; i++ ) 
+        priv.comp.sect.el[i].style.height = window.innerHeight + 'px';
       
-      if ( priv.default.autoplay.init && priv.counterSection !== priv.comp.sect.el.length - 1 )
-        start()
-      else 
-        clearTimeout( timerId );
-    }, restart );
+      containerOffsetHeight = Math.round( priv.container.offsetHeight / 2 );
+      navigatorOffsetHeight = Math.round( priv.comp.nav.list.el[0].offsetHeight / 2 );
+      
+      priv.comp.nav.list.el[0].style.top = containerOffsetHeight - navigatorOffsetHeight + 'px';
+      priv.comp.wrap.el[0].style.transform = 'translateY(-' + priv.comp.sect.el[priv.counterSection].offsetTop + 'px)';
+      }, 69);
   }
-
-  start();
+    
+window.addEventListener( 'resize', actualResizeHandler );
 
 })();
 
